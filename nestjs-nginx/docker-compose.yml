@@ -1,0 +1,35 @@
+version: '3'
+services:
+  backend:
+    image: "node:18"
+    container_name: "backend"
+    working_dir: "/app"
+    environment:
+      NODE_ENV: "development"
+      HOST: "0.0.0.0"
+      PORT: "3000"
+    expose:
+      - "3000"
+    volumes:
+      - "./backend:/app:delegated"
+    command: "bash -c 'yarn && yarn start:dev'"
+    networks:
+      - "app"
+
+  nginx:
+    image: "nginx:1.25"
+    container_name: "nginx"
+    volumes:
+      - "./nginx/default.conf:/etc/nginx/conf.d/default.conf"
+      - "./nginx/app.crt:/etc/nginx/cert/app.crt"
+      - "./nginx/app.key:/etc/nginx/cert/app.key"
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - "app"
+    depends_on:
+      - "backend"
+
+networks:
+  app:

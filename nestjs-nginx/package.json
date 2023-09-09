@@ -1,0 +1,11 @@
+{
+  "name": "nestjs-nginx",
+  "version": "1.0.0",
+  "scripts": {
+    "cert": "openssl req -x509 -nodes -newkey rsa:2048 -keyout ./nginx/app.key -out nginx/app.crt -subj '/CN=app.localhost'",
+    "start": "docker compose up -d",
+    "stop": "docker compose down",
+    "restart": "docker compose restart",
+    "logs": "docker compose logs -f"
+  }
+}
