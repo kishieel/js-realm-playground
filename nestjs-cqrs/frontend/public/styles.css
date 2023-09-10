@@ -1,0 +1,17 @@
+body {
+    margin: 0;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #282c34;
+    min-height: 100vh;
+}
+
+canvas {
+    background: #000;
+}
+
