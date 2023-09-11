@@ -8,6 +8,8 @@ import { range } from '../../utils/functions/range';
 import { Color } from '../enums/color.enum';
 import { SnakeDeletedEvent } from '../events/triggers/snake-deleted.event';
 import { SnakeMovedEvent } from '../events/triggers/snake-moved.event';
+import { SnakeDiedEvent } from '../events/triggers/snake-died.event';
+import { FruitEatenEvent } from '../events/triggers/fruit-eaten.event';
 
 export class Snake extends AggregateRoot {
     @Inject(GAME_CONFIG_KEY)
@@ -53,14 +55,13 @@ export class Snake extends AggregateRoot {
     }
 
     move() {
-        for (let i = this._tail.length - 1; i > 0; i--) {
-            this._tail[i].x = this._tail[i - 1].x;
-            this._tail[i].y = this._tail[i - 1].y;
-        }
-
         const delta = this.getMovementDelta();
-        this._tail[0].x += delta.x;
-        this._tail[0].y += delta.y;
+        const newHead = {
+            x: this._tail[0].x + delta.x,
+            y: this._tail[0].y + delta.y,
+        }
+        this._tail.unshift(newHead);
+        this._tail.pop();
 
         if (this._tail[0].x < 0) this._tail[0].x = 48 - 1;
         if (this._tail[0].x >= 48) this._tail[0].x = 0;
@@ -68,6 +69,15 @@ export class Snake extends AggregateRoot {
         if (this._tail[0].y >= 36) this._tail[0].y = 0;
 
         this.apply(new SnakeMovedEvent(this._id, this._tail));
+    }
+
+    die() {
+        const loot = this._tail.filter(() => Math.random() > 0.5);
+        this.apply(new SnakeDiedEvent(this._id, loot))
+    }
+
+    eat(fruitId: string) {
+        this.apply(new FruitEatenEvent(fruitId, this._id));
     }
 
     delete() {

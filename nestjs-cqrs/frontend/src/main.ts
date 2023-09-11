@@ -1,7 +1,7 @@
 import { Engine } from './engines/engine';
 
 const bootstrap = () => {
-    const ws = new WebSocket('ws://localhost:3000');
+    const ws = new WebSocket('wss://app.localhost/api');
     const en = new Engine(ws);
 
     ws.onopen = () => {

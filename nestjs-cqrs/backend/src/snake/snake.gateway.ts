@@ -1,6 +1,5 @@
 import {
     OnGatewayConnection,
-    OnGatewayDisconnect,
     OnGatewayInit,
     SubscribeMessage,
     WebSocketGateway,
@@ -13,7 +12,6 @@ import { OnApplicationShutdown } from '@nestjs/common';
 import { WsService } from './ws.service';
 import { Subscription } from 'rxjs';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
-import { DeleteSnakeCommand } from './commands/triggers/delete-snake.command';
 import { DirectionChangedDto } from './dtos/direction-changed.dto';
 import { RedirectSnakeCommand } from './commands/triggers/redirect-snake.command';
 import { GetSnakesQuery } from './queries/triggers/get-snakes.query';
@@ -22,7 +20,7 @@ import { Snake } from './models/snake.model';
 import { Fruit } from './models/fruit.model';
 
 @WebSocketGateway()
-export class SnakeGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, OnApplicationShutdown {
+export class SnakeGateway implements OnGatewayConnection, OnGatewayInit, OnApplicationShutdown {
     private eventSubscription: Subscription;
 
     @WebSocketServer()
@@ -32,7 +30,8 @@ export class SnakeGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         private readonly commandBus: CommandBus,
         private readonly queryBus: QueryBus,
         private readonly wsService: WsService,
-    ) {}
+    ) {
+    }
 
     afterInit(server: Server): void {
         this.eventSubscription = this.wsService.getEventSubject$().subscribe({
@@ -49,21 +48,12 @@ export class SnakeGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         const snakeId = randomStringGenerator();
         socket.metadata = { snakeId };
         await this.commandBus.execute(new SpawnSnakeCommand(snakeId));
-    }
-
-    async handleDisconnect(socket: WebSocket) {
-        await this.commandBus.execute(new DeleteSnakeCommand(socket.metadata.snakeId));
+        socket.send(JSON.stringify({ event: 'snakeConfirmed', data: { snakeId } }));
     }
 
     @SubscribeMessage('directionChanged')
     async handleDirectionChanged(socket: WebSocket, payload: DirectionChangedDto) {
         await this.commandBus.execute(new RedirectSnakeCommand(socket.metadata.snakeId, payload.direction));
-    }
-
-    @SubscribeMessage('fruitEaten')
-    async handleFruitEaten(socket: WebSocket, payload: any) {
-        [{ socket, payload }];
-        console.log(payload);
     }
 
     @SubscribeMessage('snakesRequested')

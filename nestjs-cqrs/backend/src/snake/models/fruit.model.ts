@@ -1,6 +1,9 @@
 import { AggregateRoot } from '@nestjs/cqrs';
-import { Direction } from '../enums/direction.enum';
 import { Coords } from '../types/coords.type';
+import { FruitSpawnedEvent } from '../events/triggers/fruit-spawned.event';
+import { FruitEatenEvent } from '../events/triggers/fruit-eaten.event';
+import { FruitDeletedEvent } from '../events/triggers/fruit-deleted.event';
+import { range } from '../../utils/functions/range';
 
 export class Fruit extends AggregateRoot {
     private _coords: Coords;
@@ -21,7 +24,12 @@ export class Fruit extends AggregateRoot {
         this._coords = coords;
     }
 
-    eaten() {
-        // sent message that fruit was eaten
+    spawn(coords?: Coords) {
+        this._coords = coords ? coords : { x: range(0, 48), y: range(0, 36) };
+        this.apply(new FruitSpawnedEvent(this._id));
+    }
+
+    delete() {
+        this.apply(new FruitDeletedEvent(this._id))
     }
 }

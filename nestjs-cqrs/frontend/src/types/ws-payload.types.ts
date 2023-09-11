@@ -26,6 +26,13 @@ export type SnakeDeletedPayload = {
     },
 }
 
+export type SnakeDiedPayload = {
+    event: 'snakeDied'
+    data: {
+        snakeId: string,
+    },
+}
+
 export type SnakeMovedPayload = {
     event: 'snakeMoved'
     data: {
@@ -41,6 +48,20 @@ export type SnakesFetchedPayload = {
     },
 }
 
+export type FruitDeletedPayload = {
+    event: 'fruitDeleted'
+    data: {
+        fruitId: string;
+    },
+}
+
+export type FruitSpawnedPayload = {
+    event: 'fruitSpawned'
+    data: {
+        fruit: Fruit;
+    },
+}
+
 export type FruitsFetchedPayload = {
     event: 'fruitsFetched'
     data: {
@@ -51,7 +72,10 @@ export type FruitsFetchedPayload = {
 
 export type WsPayload =
     SnakesFetchedPayload
+    | SnakeDiedPayload
+    | FruitSpawnedPayload
     | FruitsFetchedPayload
+    | FruitDeletedPayload
     | SnakeSpawnedPayload
     | SnakeMovedPayload
     | SnakeConfirmedPayload

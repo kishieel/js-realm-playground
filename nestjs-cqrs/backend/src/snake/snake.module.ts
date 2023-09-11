@@ -8,6 +8,7 @@ import { FruitsRepository } from './repositories/fruits.repository';
 import { SnakeEngine } from './snake.engine';
 import { WsService } from './ws.service';
 import { QueryHandlers } from './queries/handlers';
+import { Sagas } from './sagas';
 
 @Module({
     imports: [CqrsModule],
@@ -20,6 +21,7 @@ import { QueryHandlers } from './queries/handlers';
         ...CommandHandlers,
         ...EventHandlers,
         ...QueryHandlers,
+        ...Sagas,
     ],
 })
 export class SnakeModule {}

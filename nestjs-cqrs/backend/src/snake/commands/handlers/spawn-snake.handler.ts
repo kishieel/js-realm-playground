@@ -12,9 +12,9 @@ export class SpawnSnakeHandler implements ICommandHandler<SpawnSnakeCommand> {
 
     async execute(command: SpawnSnakeCommand) {
         const { snakeId } = command;
-        const newSnake = new Snake(snakeId);
-        const snake = this.publisher.mergeObjectContext(await this.snakesRepository.save(newSnake));
+        const snake = this.publisher.mergeObjectContext(new Snake(snakeId));
         snake.spawn();
+        await this.snakesRepository.save(snake)
         snake.commit();
     }
 }

@@ -15,3 +15,23 @@ canvas {
     background: #000;
 }
 
+.game-over-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 999;
+}
+
+.game-over-text {
+    color: white;
+    margin: auto;
+    text-align: center;
+}
+
+.blur {
+    filter: blur(5px);
+}

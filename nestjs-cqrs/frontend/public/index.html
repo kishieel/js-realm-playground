@@ -5,7 +5,13 @@
         <link rel='stylesheet' type='text/css' href='styles.css'>
     </head>
     <body>
-        <main>
+        <div id="game-over" class='game-over-overlay'>
+            <div class='game-over-text'>
+                <h1>Game Over</h1>
+                <p>Press F5 to restart</p>
+            </div>
+        </div>
+        <main id='game-wrapper'>
             <canvas id='canvas' width='960' height='720'></canvas>
         </main>
         <script src='script.js'></script>

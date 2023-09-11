@@ -1,0 +1,45 @@
+version: '3'
+services:
+  backend:
+    image: "node:18"
+    working_dir: "/app"
+    environment:
+      NODE_ENV: "development"
+      HOST: "0.0.0.0"
+      PORT: "3000"
+    expose:
+      - "3000"
+    volumes:
+      - "./backend:/app:delegated"
+    command: "bash -c 'yarn && yarn start:dev'"
+    networks:
+      - "app"
+
+  frontend:
+    image: "node:18"
+    working_dir: "/app"
+    expose:
+      - "3000"
+    volumes:
+      - "./frontend:/app:delegated"
+    command: "bash -c 'yarn && yarn mix && yarn http-server -p 3000'"
+    networks:
+      - "app"
+
+  nginx:
+    image: "nginx:1.25"
+    volumes:
+      - "./nginx/default.conf:/etc/nginx/conf.d/default.conf"
+      - "./nginx/app.crt:/etc/nginx/cert/app.crt"
+      - "./nginx/app.key:/etc/nginx/cert/app.key"
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - "app"
+    depends_on:
+      - "backend"
+      - "frontend"
+
+networks:
+  app:

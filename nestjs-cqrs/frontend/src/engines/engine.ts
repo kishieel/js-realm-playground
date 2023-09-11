@@ -1,7 +1,10 @@
 import {
+    FruitDeletedPayload,
     FruitsFetchedPayload,
+    FruitSpawnedPayload,
     SnakeConfirmedPayload,
     SnakeDeletedPayload,
+    SnakeDiedPayload,
     SnakeMovedPayload,
     SnakesFetchedPayload,
     SnakeSpawnedPayload,
@@ -18,6 +21,8 @@ export class Engine {
     private readonly canvas: HTMLCanvasElement;
     private readonly ctx: CanvasRenderingContext2D;
     private readonly ws: WebSocket;
+    private snakeId?: string;
+    private gameOver = false;
 
     constructor(ws: WebSocket) {
         this.ws = ws;
@@ -48,14 +53,21 @@ export class Engine {
                 return this.handleSnakeMoved(payload.data);
             case 'snakeDeleted':
                 return this.handleSnakeDeleted(payload.data);
+            case 'snakeDied':
+                return this.handleSnakeDied(payload.data);
             case 'snakesFetched':
                 return this.handleSnakesFetched(payload.data);
+            case 'fruitDeleted':
+                return this.handleFruitDeleted(payload.data);
+            case 'fruitSpawned':
+                return this.handleFruitSpawned(payload.data);
             case 'fruitsFetched':
                 return this.handleFruitsFetched(payload.data);
         }
     }
 
     handleSnakeConfirmed(data: SnakeConfirmedPayload['data']) {
+        this.snakeId = data.snakeId;
     }
 
     handleSnakeSpawned(data: SnakeSpawnedPayload['data']) {
@@ -80,11 +92,30 @@ export class Engine {
         data.snakes.forEach((snake) => this.snakes.set(snake.id, snake));
     }
 
+    handleSnakeDied(data: SnakeDiedPayload['data']) {
+        console.log(this.snakeId, data.snakeId);
+        if (this.snakeId === data.snakeId) {
+            this.gameOver = true;
+            this.disable();
+        }
+    }
+
+    handleFruitDeleted(data: FruitDeletedPayload['data']) {
+        this.fruits.delete(data.fruitId);
+    }
+
+    handleFruitSpawned(data: FruitSpawnedPayload['data']) {
+        const { fruit } = data;
+        this.fruits.set(fruit.id, fruit);
+    }
+
     handleFruitsFetched(data: FruitsFetchedPayload['data']) {
         data.fruits.forEach((fruit) => this.fruits.set(fruit.id, fruit));
     }
 
     changeDirection(key: string) {
+        if (this.gameOver) return;
+
         const direction = keyToDirectionMap.get(key);
         if (!direction) return;
 
@@ -96,7 +127,6 @@ export class Engine {
 
     update() {
         this.redraw();
-        this.checkCollisions();
     }
 
     redraw() {
@@ -115,7 +145,11 @@ export class Engine {
         }
     }
 
-    checkCollisions() {
+    disable() {
+        const gameOverDiv = document.querySelector<HTMLDivElement>('#game-over')!;
+        gameOverDiv.style.display = 'flex';
 
+        const gameWrapperDiv = document.querySelector<HTMLDivElement>('#game-wrapper')!;
+        gameWrapperDiv.classList.add('blur');
     }
 }

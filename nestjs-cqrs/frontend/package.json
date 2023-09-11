@@ -5,6 +5,7 @@
   "devDependencies": {
     "laravel-mix": "6.0.49",
     "ts-loader": "9.4.4",
-    "typescript": "5.2.2"
+    "typescript": "5.2.2",
+    "http-server": "14.1.1"
   }
 }

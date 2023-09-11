@@ -13,7 +13,7 @@ export class DeleteSnakeHandler implements ICommandHandler<DeleteSnakeCommand> {
         const { snakeId } = command;
         const snake = this.publisher.mergeObjectContext(await this.snakesRepository.findById(snakeId));
         snake.delete();
-        snake.commit();
         await this.snakesRepository.deleteById(snakeId);
+        snake.commit();
     }
 }

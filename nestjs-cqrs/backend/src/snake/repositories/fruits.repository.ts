@@ -27,4 +27,13 @@ export class FruitsRepository {
     async findAll(): Promise<Fruit[]> {
         return Array.from(this.db.values());
     }
+
+    async deleteById(id: string) {
+        this.db.delete(id);
+    }
+
+    async save(fruit: Fruit) {
+        this.db.set(fruit.id, fruit);
+        return fruit;
+    }
 }

@@ -38,6 +38,7 @@ var Engine = /*#__PURE__*/function () {
     _classCallCheck(this, Engine);
     this.snakes = new Map();
     this.fruits = new Map();
+    this.gameOver = false;
     this.ws = ws;
     var canvas = document.querySelector('#canvas');
     if (!canvas) throw new Error('No canvas found!');
@@ -68,15 +69,23 @@ var Engine = /*#__PURE__*/function () {
           return this.handleSnakeMoved(payload.data);
         case 'snakeDeleted':
           return this.handleSnakeDeleted(payload.data);
+        case 'snakeDied':
+          return this.handleSnakeDied(payload.data);
         case 'snakesFetched':
           return this.handleSnakesFetched(payload.data);
+        case 'fruitDeleted':
+          return this.handleFruitDeleted(payload.data);
+        case 'fruitSpawned':
+          return this.handleFruitSpawned(payload.data);
         case 'fruitsFetched':
           return this.handleFruitsFetched(payload.data);
       }
     }
   }, {
     key: "handleSnakeConfirmed",
-    value: function handleSnakeConfirmed(data) {}
+    value: function handleSnakeConfirmed(data) {
+      this.snakeId = data.snakeId;
+    }
   }, {
     key: "handleSnakeSpawned",
     value: function handleSnakeSpawned(data) {
@@ -112,6 +121,26 @@ var Engine = /*#__PURE__*/function () {
       });
     }
   }, {
+    key: "handleSnakeDied",
+    value: function handleSnakeDied(data) {
+      console.log(this.snakeId, data.snakeId);
+      if (this.snakeId === data.snakeId) {
+        this.gameOver = true;
+        this.disable();
+      }
+    }
+  }, {
+    key: "handleFruitDeleted",
+    value: function handleFruitDeleted(data) {
+      this.fruits["delete"](data.fruitId);
+    }
+  }, {
+    key: "handleFruitSpawned",
+    value: function handleFruitSpawned(data) {
+      var fruit = data.fruit;
+      this.fruits.set(fruit.id, fruit);
+    }
+  }, {
     key: "handleFruitsFetched",
     value: function handleFruitsFetched(data) {
       var _this2 = this;
@@ -122,6 +151,7 @@ var Engine = /*#__PURE__*/function () {
   }, {
     key: "changeDirection",
     value: function changeDirection(key) {
+      if (this.gameOver) return;
       var direction = key_to_direction_map_1.keyToDirectionMap.get(key);
       if (!direction) return;
       this.ws.send(JSON.stringify({
@@ -135,7 +165,6 @@ var Engine = /*#__PURE__*/function () {
     key: "update",
     value: function update() {
       this.redraw();
-      this.checkCollisions();
     }
   }, {
     key: "redraw",
@@ -172,8 +201,13 @@ var Engine = /*#__PURE__*/function () {
       }
     }
   }, {
-    key: "checkCollisions",
-    value: function checkCollisions() {}
+    key: "disable",
+    value: function disable() {
+      var gameOverDiv = document.querySelector('#game-over');
+      gameOverDiv.style.display = 'flex';
+      var gameWrapperDiv = document.querySelector('#game-wrapper');
+      gameWrapperDiv.classList.add('blur');
+    }
   }]);
   return Engine;
 }();
@@ -306,7 +340,7 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 var engine_1 = __webpack_require__(/*! ./engines/engine */ "./src/engines/engine.ts");
 var bootstrap = function bootstrap() {
-  var ws = new WebSocket('ws://localhost:3000');
+  var ws = new WebSocket('wss://app.localhost/api');
   var en = new engine_1.Engine(ws);
   ws.onopen = function () {
     console.log('Connected');
