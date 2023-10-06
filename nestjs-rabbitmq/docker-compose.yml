@@ -1,0 +1,113 @@
+version: '3.8'
+services:
+  users:
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
+      args:
+        UID: "${UID}"
+        GID: "${GID}"
+    working_dir: "/app"
+    restart: "unless-stopped"
+    environment:
+      NODE_ENV: "development"
+      RABBIT_URL: "amqp://guest:guest@rabbitmq:5672"
+    ports:
+      - "3000:3000"
+    expose:
+      - "3000"
+    volumes:
+      - "./:/app:delegated"
+    command: "bash -c 'yarn && yarn start:dev users'"
+    networks:
+      - "app"
+    depends_on:
+      - "rabbitmq"
+
+  mailing:
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
+      args:
+        UID: "${UID}"
+        GID: "${GID}"
+    working_dir: "/app"
+    restart: "unless-stopped"
+    environment:
+      NODE_ENV: "development"
+      RABBIT_URL: "amqp://guest:guest@rabbitmq:5672"
+    expose:
+      - "3000"
+    volumes:
+      - "./:/app:delegated"
+    command: "bash -c 'yarn && yarn start:dev mailing'"
+    networks:
+      - "app"
+    depends_on:
+      - "rabbitmq"
+
+  billing:
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
+      args:
+        UID: "${UID}"
+        GID: "${GID}"
+    working_dir: "/app"
+    restart: "unless-stopped"
+    environment:
+      NODE_ENV: "development"
+      RABBIT_URL: "amqp://guest:guest@rabbitmq:5672"
+    expose:
+      - "3000"
+    volumes:
+      - "./:/app:delegated"
+    command: "bash -c 'yarn && yarn start:dev billing'"
+    networks:
+      - "app"
+    depends_on:
+      - "rabbitmq"
+
+  rabbit:
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
+      args:
+        UID: "${UID}"
+        GID: "${GID}"
+    working_dir: "/app"
+    restart: "unless-stopped"
+    environment:
+      NODE_ENV: "development"
+      RABBIT_API_URL: "http://rabbitmq:15672/api"
+      RABBIT_RMQ_URL: "amqp://guest:guest@rabbitmq:5672"
+      RABBIT_USERNAME: "guest"
+      RABBIT_PASSWORD: "guest"
+    expose:
+      - "3000"
+    volumes:
+      - "./:/app:delegated"
+    command: "bash -c 'yarn && yarn start:dev rabbit'"
+    networks:
+      - "app"
+    depends_on:
+      - "rabbitmq"
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+    volumes:
+      - "rabbitmq:/var/lib/rabbitmq"
+    networks:
+      - "app"
+
+volumes:
+  rabbitmq: null
+
+networks:
+  app: null
