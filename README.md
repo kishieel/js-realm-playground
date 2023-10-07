@@ -42,6 +42,9 @@ In this project, a RabbitMQ-based event-driven architecture is employed to facil
 #### [NestJS Real-Time Chat With Socket.io](./nestjs-socket.io)
 This project showcases a real-time chat application built with NestJS and powered by Socket.io. Users can engage in instant messaging, enabling seamless communication with real-time updates and interactive features.
 
+#### [NestJS With TypeORM ](./nestjs-typeorm)
+This project serves as a simple showcase of NestJS integrated with TypeORM, featuring the implementation of fundamental concepts such as timestamp columns, one-to-many and many-to-many relations, and database migrations for seamless data management.
+
 ### Get Started
 
 To get started with any of the projects in the JS Realm Playground, follow these general steps:
