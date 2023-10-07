@@ -39,10 +39,13 @@ corresponding actions.
 #### [NestJS RabbitMQ Event-Driven Microservices](./nestjs-rabbitmq)
 In this project, a RabbitMQ-based event-driven architecture is employed to facilitate event distribution among microservices. A specialized microservice is responsible for building and automating the RabbitMQ topology, including the creation of queues, exchanges, and bindings, to streamline the event-driven communication process.
 
+#### [NestJS Caching With Redis](./nestjs-redis)
+This application employs Redis for efficient caching operations and introduces a custom decorator to simplify caching in NestJS. 
+
 #### [NestJS Real-Time Chat With Socket.io](./nestjs-socket.io)
 This project showcases a real-time chat application built with NestJS and powered by Socket.io. Users can engage in instant messaging, enabling seamless communication with real-time updates and interactive features.
 
-#### [NestJS With TypeORM ](./nestjs-typeorm)
+#### [NestJS With TypeORM](./nestjs-typeorm)
 This project serves as a simple showcase of NestJS integrated with TypeORM, featuring the implementation of fundamental concepts such as timestamp columns, one-to-many and many-to-many relations, and database migrations for seamless data management.
 
 ### Get Started

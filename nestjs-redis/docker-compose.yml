@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
+      args:
+        UID: "${UID}"
+        GID: "${GID}"
+    working_dir: "/app"
+    restart: "unless-stopped"
+    ports:
+      - "3000:3000"
+    expose:
+      - "3000"
+    volumes:
+      - "./:/app:delegated"
+    command: "bash -c 'yarn && yarn start:dev'"
+    networks:
+      - "app"
+    depends_on:
+      - "redis"
+
+  redis:
+    image: "redis:latest"
+    expose:
+      - "6379"
+    volumes:
+      - "redis:/data"
+    networks:
+      - "app"
+
+  redis-commander:
+    image: "rediscommander/redis-commander:latest"
+    environment:
+      REDIS_HOSTS: "local:redis:6379"
+    ports:
+      - "8081:8081"
+    networks:
+      - "app"
+
+volumes:
+  redis: null
+
+networks:
+  app: null
