@@ -1,0 +1,75 @@
+version: '3.8'
+services:
+  users:
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
+      args:
+        UID: "${UID}"
+        GID: "${GID}"
+    working_dir: "/app"
+    restart: "always"
+    healthcheck:
+      test: "curl -f http://localhost:3000/graphql?query=%7B__typename%7D"
+      interval: "30s"
+      timeout: "10s"
+    environment:
+      NODE_ENV: "development"
+    expose:
+      - "3000"
+    volumes:
+      - "./users:/app:delegated"
+    command: "bash -c 'yarn && yarn start:dev'"
+    networks:
+      - "app"
+
+  posts:
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
+      args:
+        UID: "${UID}"
+        GID: "${GID}"
+    working_dir: "/app"
+    restart: "always"
+    healthcheck:
+      test: "curl -f http://localhost:3000/graphql?query=%7B__typename%7D"
+      interval: "30s"
+      timeout: "10s"
+    environment:
+      NODE_ENV: "development"
+    expose:
+      - "3000"
+    volumes:
+      - "./posts:/app:delegated"
+    command: "bash -c 'yarn && yarn start:dev'"
+    networks:
+      - "app"
+
+  gateway:
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
+      args:
+        UID: "${UID}"
+        GID: "${GID}"
+    working_dir: "/app"
+    restart: "always"
+    healthcheck:
+      test: "curl -f http://localhost:3000/graphql?query=%7B__typename%7D"
+      interval: "30s"
+      timeout: "10s"
+    environment:
+      NODE_ENV: "development"
+    ports:
+      - "3000:3000"
+    expose:
+      - "3000"
+    volumes:
+      - "./gateway:/app:delegated"
+    command: "bash -c 'yarn && yarn start:dev'"
+    networks:
+      - "app"
+
+networks:
+  app: null

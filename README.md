@@ -10,6 +10,9 @@ you'll find a collection of my projects that demonstrate my skills and interests
 
 ### Featured Projects
 
+#### [NestJS Apollo Federation](./nestjs-apollo-federation)
+This application harnesses Apollo Federation to create subgraphs within microservices and assembles them into a supergraph within a gateway. Additionally, it incorporates a complexity plugin to manage the complexities of the interconnected data, showcasing a powerful approach to microservices architecture and GraphQL.
+
 #### [NestJS With Automock](./nestjs-automock)
 
 A NestJS application showcasing the use of the Automock package in tests to simplify and streamline the testing process.
