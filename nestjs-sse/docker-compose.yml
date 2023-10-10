@@ -1,0 +1,47 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
+      args:
+        UID: "${UID}"
+        GID: "${GID}"
+    working_dir: "/app"
+    restart: "always"
+    environment:
+      NODE_ENV: "development"
+      HOST: "0.0.0.0"
+      PORT: "3000"
+      DATABASE_URL: "mysql://root:root@mysql:3306/app"
+    ports:
+      - "3000:3000"
+    expose:
+      - "3000"
+    volumes:
+      - "./:/app:delegated"
+    command: "bash -c 'yarn && yarn start:dev'"
+    depends_on:
+      - "mysql"
+    networks:
+      - "app"
+
+  mysql:
+    image: "mysql:8"
+    restart: "unless-stopped"
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306:3306"
+    volumes:
+      - "mysql:/var/lib/mysql"
+    networks:
+      - "app"
+
+volumes:
+  mysql: null
+
+networks:
+  app: null
