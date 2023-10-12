@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
+      target: "development"
+      args:
+        UID: "${UID}"
+        GID: "${GID}"
+    working_dir: "/app"
+    restart: "always"
+    ports: ["3000:3000"]
+    expose: ["3000"]
+    volumes: ["./:/app:delegated"]
+    networks: ["app"]
+    command: "bash -c 'yarn && yarn start:dev'"
+
+networks:
+  app: null

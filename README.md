@@ -22,6 +22,9 @@ A NestJS application showcasing the use of the Automock package in tests to simp
 An application showcasing the CQRS (Command Query Responsibility Segregation) architecture, featuring a multiplayer
 snake game powered by WebSockets for real-time interactions.
 
+#### [NestJS Docker](./nestjs-docker)
+In this project, Docker is employed to optimize the development and production environments with separate stages. A Dockerfile is used for building both production and development images, while a Docker Compose file prepares the development environment, illustrating an efficient Docker-based setup for NestJS applications.
+
 #### [NestJS Dynamic Guard](./nestjs-dynamic-guard)
 
 A dynamic authentication guard for NestJS that can be instantiated per module with different configurations. This guard
@@ -44,6 +47,9 @@ In this project, a RabbitMQ-based event-driven architecture is employed to facil
 
 #### [NestJS Caching With Redis](./nestjs-redis)
 This application employs Redis for efficient caching operations and introduces a custom decorator to simplify caching in NestJS. 
+
+#### [NestJS Schematics](./nestjs-schematics)
+This project introduces custom schematics to expedite the setup of new NestJS projects. By creating a personalized schematic, it streamlines the process of creating boilerplate code, enhancing productivity and project consistency.
 
 #### [NestJS Real-Time Chat With Socket.io](./nestjs-socket.io)
 This project showcases a real-time chat application built with NestJS and powered by Socket.io. Users can engage in instant messaging, enabling seamless communication with real-time updates and interactive features.
