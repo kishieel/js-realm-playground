@@ -1,6 +1,6 @@
 {
   "name": "@kishieel/nestjs-schematics",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "dist/index.js",
   "files": [
     "dist/**/*"
@@ -12,8 +12,8 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint \"src/**/*.ts\" --fix",
     "compile": "tsc --project tsconfig.json",
-    "copy:schema": "cpx src/collection.json dist && cpx 'src/schematics/**/schema.json' dist/schematics",
-    "copy:files": "cpx 'src/schematics/**/{files,workspace}/**/*.*' dist/schematics && cpx 'src/schematics/**/{files,workspace}/**/.!(gitignore)' dist/schematics",
+    "copy:schema": "cpx src/collection.json dist && cpx 'src/lib/**/schema.json' dist/lib",
+    "copy:files": "cpx 'src/lib/**/{files,workspace}/**/*.*' dist/lib && cpx 'src/lib/**/{files,workspace}/**/.!(gitignore)' dist/lib",
     "build": "yarn compile && yarn copy:schema && yarn copy:files"
   },
   "dependencies": {
