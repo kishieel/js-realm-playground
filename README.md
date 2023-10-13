@@ -22,6 +22,9 @@ A NestJS application showcasing the use of the Automock package in tests to simp
 An application showcasing the CQRS (Command Query Responsibility Segregation) architecture, featuring a multiplayer
 snake game powered by WebSockets for real-time interactions.
 
+#### [NestJS Multi-regional Architecture](./nestjs-distributed)
+This project showcases a comprehensive microservices architecture in NestJS. It features communication between microservices via RabbitMQ, an event bus dispatching events to specific queues, individual queues for each service, RPC over Rabbit, and a gateway serving as the sole entry point for external access. Additionally, the gateway compiles Swagger API documentation from all microservices into a unified address. With Docker Compose and distinct networks, it simulates a multi-regional environment with independent clusters capable of communication via RabbitMQ with federation plugin.
+
 #### [NestJS Docker](./nestjs-docker)
 In this project, Docker is employed to optimize the development and production environments with separate stages. A Dockerfile is used for building both production and development images, while a Docker Compose file prepares the development environment, illustrating an efficient Docker-based setup for NestJS applications.
 
