@@ -1,0 +1,216 @@
+version: '3.8'
+
+x-templates:
+  nest:
+    &nest_template
+    build:
+      &nest_template_build
+      dockerfile: "./../../Dockerfile"
+      target: "development"
+      args:
+        UID: "${UID:-1000}"
+        GID: "${GID:-1000}"
+        GITHUB_TOKEN: "${GITHUB_TOKEN}"
+    labels:
+      - "autoheal=true"
+    working_dir: "/app"
+    restart: "unless-stopped"
+    healthcheck:
+      test: "curl -f http://localhost:3000/health/liveness"
+      start_period: "10s"
+      interval: "10s"
+      timeout: "5s"
+      retries: 1
+    expose: [ "3000" ]
+    command: "bash -c 'yarn && yarn start:dev'"
+    depends_on: [ "mysql-1", "mysql-2", "rabbit-1", "rabbit-2" ]
+
+  rabbit:
+    &rabbit_template
+    image: "rabbitmq:3-management"
+    restart: "unless-stopped"
+    expose: [ "5672", "15672" ]
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+
+  mysql:
+    &mysql_template
+    image: "mysql:8"
+    restart: "unless-stopped"
+    expose: [ "3306" ]
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+
+services:
+  proxy:
+    image: "nginx:latest"
+    ports: [ "80:80" ]
+    expose: [ "80" ]
+    volumes:
+      - "./nginx/default.conf:/etc/nginx/conf.d/default.conf"
+    networks: [ "cluster1", "cluster2" ]
+    depends_on: [ "gateway-1", "gateway-2" ]
+
+  gateway-1:
+    <<: *nest_template
+    build:
+      <<: *nest_template_build
+      context: "./microservices/gateway"
+    volumes: [ "./microservices/gateway:/app:delegated" ]
+    networks: [ "cluster1" ]
+    environment:
+      RABBIT_RMQ_URL: "amqp://guest:guest@rabbit-1:5672"
+      RABBIT_HTTP_URL: "http://guest:guest@rabbit-1:15672"
+      USERS_URL: "http://users-1:3000"
+      POSTS_URL: "http://posts-1:3000"
+      AUTH_URL: "http://auth-1:3000"
+
+  gateway-2:
+    <<: *nest_template
+    build:
+      <<: *nest_template_build
+      context: "./microservices/gateway"
+    volumes: [ "./microservices/gateway:/app:delegated" ]
+    networks: [ "cluster2" ]
+    environment:
+      RABBIT_RMQ_URL: "amqp://guest:guest@rabbit-2:5672"
+      RABBIT_HTTP_URL: "http://guest:guest@rabbit-2:15672"
+      USERS_URL: "http://users-2:3000"
+      POSTS_URL: "http://posts-2:3000"
+      AUTH_URL: "http://auth-2:3000"
+
+  auth-1:
+    <<: *nest_template
+    build:
+      <<: *nest_template_build
+      context: "./microservices/auth"
+    volumes: [ "./microservices/auth:/app:delegated" ]
+    networks: [ "cluster1" ]
+    environment:
+      RABBIT_RMQ_URL: "amqp://guest:guest@rabbit-1:5672"
+      RABBIT_HTTP_URL: "http://guest:guest@rabbit-1:15672"
+      DATABASE_URL: "mysql://root:root@mysql-1:3306/auth"
+      JWT_SECRET: "jwt-secret"
+
+  auth-2:
+    <<: *nest_template
+    build:
+      <<: *nest_template_build
+      context: "./microservices/auth"
+    volumes: [ "./microservices/auth:/app:delegated" ]
+    networks: [ "cluster2" ]
+    environment:
+      RABBIT_RMQ_URL: "amqp://guest:guest@rabbit-2:5672"
+      RABBIT_HTTP_URL: "http://guest:guest@rabbit-2:15672"
+      DATABASE_URL: "mysql://root:root@mysql-2:3306/auth"
+      JWT_SECRET: "jwt-secret"
+
+  users-1:
+    <<: *nest_template
+    build:
+      <<: *nest_template_build
+      context: "./microservices/users"
+    volumes: [ "./microservices/users:/app:delegated" ]
+    networks: [ "cluster1" ]
+    environment:
+      RABBIT_RMQ_URL: "amqp://guest:guest@rabbit-1:5672"
+      RABBIT_HTTP_URL: "http://guest:guest@rabbit-1:15672"
+      DATABASE_URL: "mysql://root:root@mysql-1:3306/users"
+
+  users-2:
+    <<: *nest_template
+    build:
+      <<: *nest_template_build
+      context: "./microservices/users"
+    volumes: [ "./microservices/users:/app:delegated" ]
+    networks: [ "cluster2" ]
+    environment:
+      RABBIT_RMQ_URL: "amqp://guest:guest@rabbit-2:5672"
+      RABBIT_HTTP_URL: "http://guest:guest@rabbit-2:15672"
+      DATABASE_URL: "mysql://root:root@mysql-2:3306/users"
+
+  posts-1:
+    <<: *nest_template
+    build:
+      <<: *nest_template_build
+      context: "./microservices/posts"
+    volumes: [ "./microservices/posts:/app:delegated" ]
+    networks: [ "cluster1" ]
+    environment:
+      RABBIT_RMQ_URL: "amqp://guest:guest@rabbit-1:5672"
+      RABBIT_HTTP_URL: "http://guest:guest@rabbit-1:15672"
+      DATABASE_URL: "mysql://root:root@mysql-1:3306/posts"
+
+  posts-2:
+    <<: *nest_template
+    build:
+      <<: *nest_template_build
+      context: "./microservices/posts"
+    volumes: [ "./microservices/posts:/app:delegated" ]
+    networks: [ "cluster2" ]
+    environment:
+      RABBIT_RMQ_URL: "amqp://guest:guest@rabbit-2:5672"
+      RABBIT_HTTP_URL: "http://guest:guest@rabbit-2:15672"
+      DATABASE_URL: "mysql://root:root@mysql-2:3306/posts"
+
+  rabbit-1:
+    <<: *rabbit_template
+    hostname: "rabbit-1"
+    volumes:
+      - "rabbit1:/var/lib/rabbitmq"
+      - "./rabbit/enabled_plugins:/etc/rabbitmq/enabled_plugins"
+      - "./rabbit/init.sh:/init.sh"
+    networks: [ "cluster1", "cluster2" ]
+    ports: [ "15672:15672" ]
+    command: "/init.sh"
+    environment:
+      UPSTREAM_NAME: "cluster-2"
+      UPSTREAM_CONFIG: '{"uri":"amqp://guest:guest@rabbit-2:5672","expires":3600000,"exchange":"eventbus.external"}'
+
+  rabbit-2:
+    <<: *rabbit_template
+    hostname: "rabbit-2"
+    volumes:
+      - "rabbit2:/var/lib/rabbitmq"
+      - "./rabbit/enabled_plugins:/etc/rabbitmq/enabled_plugins"
+      - "./rabbit/init.sh:/init.sh"
+    networks: [ "cluster1", "cluster2" ]
+    ports: [ "15673:15672" ]
+    command: "/init.sh"
+    environment:
+      UPSTREAM_NAME: "cluster-1"
+      UPSTREAM_CONFIG: '{"uri":"amqp://guest:guest@rabbit-1:5672","expires":3600000,"exchange":"eventbus.external"}'
+
+  mysql-1:
+    <<: *mysql_template
+    volumes: [ "mysql1:/var/lib/mysql" ]
+    networks: [ "cluster1" ]
+    ports: [ "3306:3306" ]
+
+  mysql-2:
+    <<: *mysql_template
+    volumes: [ "mysql2:/var/lib/mysql" ]
+    networks: [ "cluster2" ]
+    ports: [ "3307:3306" ]
+
+  autoheal:
+    image: "willfarrell/autoheal:latest"
+    tty: true
+    restart: "unless-stopped"
+    environment:
+      AUTOHEAL_INTERVAL: 30
+      AUTOHEAL_START_PERIOD: 100
+      AUTOHEAL_DEFAULT_STOP_TIMEOUT: 10
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+volumes:
+  rabbit1:
+  rabbit2:
+  mysql1:
+  mysql2:
+
+networks:
+  cluster1:
+  cluster2:
